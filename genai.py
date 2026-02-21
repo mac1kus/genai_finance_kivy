@@ -391,6 +391,8 @@ def analyze_stock(name: str) -> dict:
         "entry_price": prediction["entry_price"],
         "target_price": prediction["target_price"],
         "stop_loss": prediction["stop_loss"],
+        "prices_20d": [round(float(x), 2) for x in df["Close"].values[-20:]],
+        "dates_20d": [str(d.date()) for d in df.index[-20:]],
     }
 
 

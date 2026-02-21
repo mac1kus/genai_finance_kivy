@@ -277,6 +277,7 @@
     <span class="signal-conf" id="signalConf">—</span>
   </div>
 
+  <div id="chartContainer" style="display:none;padding:8px 12px;background:#f7f8fa;border-bottom:1px solid rgba(10,22,40,0.08);"><canvas id="stockChart" style="height:140px;width:100%;"></canvas></div>
   <div id="chat-box"></div>
 
   <div class="msg-row typing-row" id="typing-row">
@@ -299,6 +300,7 @@
   </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="{{ url_for('static', filename='js/chat.js') }}"></script>
 </body>
 </html>

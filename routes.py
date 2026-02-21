@@ -138,6 +138,8 @@ def chat():
                 "confidence": analysis.get("confidence", ""),
                 "current_price": analysis.get("current_price", ""),
                 "currency": analysis.get("currency", ""),
+                "prices_20d": analysis.get("prices_20d", []),
+                "dates_20d": analysis.get("dates_20d", []),
             }
         except Exception as e:
             stock_context = f"STOCK DATA ERROR: {str(e)}"

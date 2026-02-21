@@ -9,6 +9,7 @@ const signalBadge = document.getElementById("signalBadge");
 const signalConf = document.getElementById("signalConf");
 
 let chatOpened = false;
+let stockChart = null;
 
 function toggleChat() {
   const isOpen = chatPopup.classList.toggle("open");
@@ -61,6 +62,69 @@ function showTyping(show) {
   if (show) chatBox.scrollTop = chatBox.scrollHeight;
 }
 
+function drawChart(meta) {
+  const container = document.getElementById("chartContainer");
+  const canvas = document.getElementById("stockChart");
+
+  if (!meta || !meta.prices_20d || meta.prices_20d.length === 0) {
+    container.style.display = "none";
+    return;
+  }
+
+  container.style.display = "block";
+
+  const prices = meta.prices_20d;
+  const labels = meta.dates_20d.map(d => d.slice(5)); // show MM-DD
+  const ma20 = prices.reduce((a, b) => a + b, 0) / prices.length;
+  const ma20Line = new Array(prices.length).fill(parseFloat(ma20.toFixed(2)));
+  const currentPrice = prices[prices.length - 1];
+  const isUp = currentPrice >= prices[0];
+
+  if (stockChart) stockChart.destroy();
+
+  stockChart = new Chart(canvas, {
+    type: "line",
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: `${meta.ticker} Price`,
+          data: prices,
+          borderColor: isUp ? "#1A7F5A" : "#C0392B",
+          backgroundColor: isUp ? "rgba(26,127,90,0.08)" : "rgba(192,57,43,0.08)",
+          borderWidth: 2,
+          pointRadius: 2,
+          fill: true,
+          tension: 0.3,
+        },
+        {
+          label: "20-Day MA",
+          data: ma20Line,
+          borderColor: "#C9A84C",
+          borderWidth: 1.5,
+          borderDash: [5, 4],
+          pointRadius: 0,
+          fill: false,
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { labels: { font: { size: 10 }, color: "#0A1628" } },
+        tooltip: { mode: "index", intersect: false }
+      },
+      scales: {
+        x: { ticks: { font: { size: 9 }, color: "#8892A4", maxTicksLimit: 7 }, grid: { display: false } },
+        y: { ticks: { font: { size: 9 }, color: "#8892A4" }, grid: { color: "rgba(0,0,0,0.05)" } }
+      }
+    }
+  });
+
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+
 function updateSignalCard(meta) {
   if (!meta || !meta.ticker) {
     signalCard.classList.remove("visible");
@@ -72,7 +136,6 @@ function updateSignalCard(meta) {
   signalBadge.textContent = meta.signal;
   signalConf.textContent = `Confidence: ${meta.confidence}%`;
 
-  // Set badge colour based on signal
   signalBadge.className = "signal-badge";
   const sig = meta.signal || "";
   if (sig.includes("BUY"))  signalBadge.classList.add("badge-buy");
@@ -80,6 +143,7 @@ function updateSignalCard(meta) {
   else signalBadge.classList.add("badge-hold");
 
   signalCard.classList.add("visible");
+  drawChart(meta);
 }
 
 async function sendMsg(text) {
