@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ARIA — Investment Advisor</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --navy: #0A1628;
+      --navy-lt: #112240;
+      --gold: #C9A84C;
+      --gold-lt: #E8C97A;
+      --cream: #F4F1EB;
+      --slate: #8892A4;
+      --white: #FFFFFF;
+      --green: #1A7F5A;
+      --red: #C0392B;
+      --shadow: rgba(10,22,40,0.18);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body { font-family: 'DM Sans', sans-serif; background: var(--cream); min-height: 100vh; }
+
+    /* HEADER */
+    .store-header {
+      background: var(--navy); padding: 0 40px; height: 70px;
+      display: flex; align-items: center; justify-content: space-between;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+    .store-logo { display: flex; align-items: center; gap: 14px; }
+    .store-logo-icon {
+      width: 42px; height: 42px; background: var(--gold);
+      border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px;
+    }
+    .store-logo-text h1 { font-family: 'Playfair Display', serif; color: var(--white); font-size: 1.3rem; font-weight: 600; }
+    .store-logo-text p  { color: var(--gold-lt); font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; }
+    .store-nav { display: flex; gap: 28px; }
+    .store-nav a { color: rgba(255,255,255,0.75); text-decoration: none; font-size: 0.88rem; transition: color 0.2s; }
+    .store-nav a:hover { color: var(--gold-lt); }
+
+    /* HERO */
+    .hero {
+      background: linear-gradient(135deg, #0A1628 0%, #1a2f50 60%, #0d1e38 100%);
+      padding: 60px 40px; text-align: center; position: relative; overflow: hidden;
+    }
+    .hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 50% 50%, rgba(201,168,76,0.12) 0%, transparent 70%);
+    }
+    .hero h2 { font-family: 'Playfair Display', serif; color: var(--white); font-size: 2.4rem; font-weight: 600; position: relative; }
+    .hero p   { color: rgba(255,255,255,0.6); margin-top: 10px; font-size: 1rem; position: relative; }
+    .hero-badges { display: flex; justify-content: center; gap: 12px; margin-top: 24px; flex-wrap: wrap; position: relative; }
+    .badge { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: var(--white); padding: 8px 20px; border-radius: 24px; font-size: 0.85rem; }
+
+    /* MARKET TICKER BAR */
+    .ticker-bar {
+      background: var(--navy-lt); padding: 10px 40px;
+      display: flex; gap: 32px; overflow-x: auto;
+      border-bottom: 1px solid rgba(201,168,76,0.2);
+    }
+    .ticker-item { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+    .ticker-item .sym { color: var(--gold-lt); font-size: 0.8rem; font-weight: 600; }
+    .ticker-item .val { color: var(--white); font-size: 0.8rem; }
+    .ticker-item .chg { font-size: 0.75rem; padding: 2px 6px; border-radius: 4px; }
+    .chg.up   { background: rgba(26,127,90,0.2); color: #4ecb8d; }
+    .chg.down { background: rgba(192,57,43,0.2); color: #e87474; }
+
+    /* MARKET CARDS */
+    .section { padding: 40px; }
+    .section h3 { font-family: 'Playfair Display', serif; color: var(--navy); font-size: 1.4rem; font-weight: 600; margin-bottom: 20px; border-left: 4px solid var(--gold); padding-left: 14px; }
+    .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; }
+    .product-card { background: var(--white); border-radius: 14px; padding: 20px 16px; text-align: center; box-shadow: 0 2px 12px var(--shadow); transition: transform 0.2s; border-top: 3px solid var(--gold); }
+    .product-card:hover { transform: translateY(-3px); }
+    .product-card .emoji { font-size: 2rem; }
+    .product-card h4 { font-size: 0.88rem; color: var(--navy); margin-top: 8px; font-weight: 600; }
+    .product-card p  { font-size: 0.75rem; color: var(--slate); margin-top: 2px; }
+
+    /* FLOATING BOT LAUNCHER */
+    .bot-launcher {
+      position: fixed; bottom: 28px; right: 28px; z-index: 1000;
+      display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer;
+    }
+    .bot-prompt {
+      background: var(--white); border: 2px solid var(--gold); color: var(--navy);
+      padding: 8px 14px; border-radius: 16px 16px 4px 16px;
+      font-size: 0.82rem; font-weight: 500;
+      box-shadow: 0 4px 18px var(--shadow); white-space: nowrap;
+      animation: promptBounce 2.5s ease-in-out infinite; position: relative;
+    }
+    .bot-prompt::after {
+      content: ''; position: absolute; bottom: -10px; right: 14px;
+      border: 5px solid transparent; border-top-color: var(--gold);
+    }
+    @keyframes promptBounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+
+    .bot-avatar-btn {
+      width: 70px; height: 70px; border-radius: 50%;
+      background: linear-gradient(145deg, var(--gold), #a8872e);
+      box-shadow: 0 6px 24px rgba(201,168,76,0.5);
+      display: flex; align-items: center; justify-content: center; font-size: 36px;
+      border: 3px solid var(--white); transition: transform 0.2s;
+      animation: avatarPop 0.5s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .bot-avatar-btn:hover { transform: scale(1.08); }
+    @keyframes avatarPop { from { transform: scale(0); } to { transform: scale(1); } }
+
+    /* CHAT POPUP */
+    .chat-popup {
+      position: fixed; bottom: 112px; right: 28px;
+      width: 380px; height: 560px;
+      background: var(--white); border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+      display: flex; flex-direction: column; z-index: 999; overflow: hidden;
+      transform: scale(0) translateY(20px); transform-origin: bottom right;
+      transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), opacity 0.2s;
+      opacity: 0; pointer-events: none;
+    }
+    .chat-popup.open { transform: scale(1) translateY(0); opacity: 1; pointer-events: all; }
+
+    .popup-header {
+      background: var(--navy); padding: 14px 16px;
+      display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+    }
+    .popup-avatar {
+      width: 42px; height: 42px; background: var(--gold);
+      border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0;
+    }
+    .popup-info h4 { color: var(--white); font-size: 0.95rem; font-weight: 600; }
+    .popup-info p  { color: var(--gold-lt); font-size: 0.72rem; display: flex; align-items: center; gap: 5px; }
+    .online-dot { width: 6px; height: 6px; background: #4ecb8d; border-radius: 50%; display: inline-block; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
+    .close-btn { margin-left: auto; background: none; border: none; color: rgba(255,255,255,0.6); font-size: 1.3rem; cursor: pointer; line-height: 1; transition: color 0.2s; }
+    .close-btn:hover { color: var(--white); }
+
+    /* SIGNAL BADGE */
+    .signal-card {
+      margin: 8px 12px 0; padding: 8px 12px; border-radius: 10px;
+      background: var(--navy); display: none; gap: 16px; align-items: center;
+      font-size: 0.75rem;
+    }
+    .signal-card.visible { display: flex; }
+    .signal-ticker { color: var(--gold-lt); font-weight: 700; font-size: 0.85rem; }
+    .signal-price { color: var(--white); }
+    .signal-badge { padding: 3px 10px; border-radius: 8px; font-weight: 700; font-size: 0.72rem; }
+    .badge-buy        { background: rgba(26,127,90,0.3); color: #4ecb8d; }
+    .badge-sell       { background: rgba(192,57,43,0.3); color: #e87474; }
+    .badge-hold       { background: rgba(201,168,76,0.3); color: var(--gold-lt); }
+    .signal-conf { color: var(--slate); font-size: 0.7rem; }
+
+    #chat-box {
+      flex: 1; overflow-y: auto; padding: 14px 12px;
+      display: flex; flex-direction: column; gap: 10px; background: #f7f8fa;
+    }
+    #chat-box::-webkit-scrollbar { width: 3px; }
+    #chat-box::-webkit-scrollbar-thumb { background: var(--slate); border-radius: 3px; }
+
+    .msg-row { display: flex; gap: 8px; animation: fadeUp 0.25s ease; }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+    .msg-row.user { flex-direction: row-reverse; }
+
+    .msg-avatar { width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 14px; margin-top: 2px; }
+    .msg-avatar.bot  { background: var(--navy); }
+    .msg-avatar.user { background: var(--gold); }
+
+    .bubble { max-width: 80%; padding: 9px 13px; border-radius: 16px; font-size: 0.85rem; line-height: 1.6; white-space: pre-wrap; }
+    .bubble.bot  { background: var(--white); color: var(--navy); border-radius: 4px 16px 16px 16px; box-shadow: 0 1px 6px var(--shadow); }
+    .bubble.user { background: var(--navy); color: var(--white); border-radius: 16px 4px 16px 16px; }
+    .bubble strong { font-weight: 600; }
+    .bubble em { font-style: italic; opacity: 0.85; }
+
+    .typing-row { display: none; }
+    .typing-row.visible { display: flex; }
+    .typing-bubble { background: var(--white); border-radius: 4px 16px 16px 16px; padding: 10px 14px; box-shadow: 0 1px 6px var(--shadow); display: flex; gap: 4px; align-items: center; }
+    .typing-bubble span { width: 7px; height: 7px; background: var(--slate); border-radius: 50%; animation: bounce 1.2s infinite; }
+    .typing-bubble span:nth-child(2) { animation-delay: 0.2s; }
+    .typing-bubble span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes bounce { 0%,80%,100% { transform:translateY(0); } 40% { transform:translateY(-5px); } }
+
+    .chips-bar { display: flex; gap: 6px; flex-wrap: wrap; padding: 8px 12px 4px; background: #f7f8fa; border-top: 1px solid rgba(10,22,40,0.08); }
+    .chip { background: var(--white); border: 1.5px solid rgba(201,168,76,0.4); color: var(--navy); padding: 4px 10px; border-radius: 14px; font-size: 0.72rem; font-weight: 500; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+    .chip:hover { background: var(--navy); color: var(--white); border-color: var(--navy); }
+
+    .popup-input { display: flex; gap: 8px; padding: 10px 12px; border-top: 1px solid rgba(10,22,40,0.1); background: var(--white); flex-shrink: 0; }
+    #user-input { flex: 1; border: 1.5px solid rgba(10,22,40,0.15); border-radius: 12px; padding: 9px 13px; font-family: 'DM Sans', sans-serif; font-size: 0.85rem; background: #f7f8fa; color: var(--navy); resize: none; outline: none; transition: border-color 0.2s; max-height: 80px; line-height: 1.4; }
+    #user-input:focus { border-color: var(--gold); }
+    #user-input::placeholder { color: var(--slate); }
+    .send-btn { width: 38px; height: 38px; background: var(--gold); border: none; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.2s; box-shadow: 0 3px 10px rgba(201,168,76,0.35); }
+    .send-btn:hover { background: #a8872e; }
+    .send-btn svg { width: 17px; height: 17px; fill: white; }
+
+    @media (max-width: 420px) { .chat-popup { width: calc(100vw - 20px); right: 10px; } }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="store-header">
+  <div class="store-logo">
+    <div class="store-logo-icon">📈</div>
+    <div class="store-logo-text">
+      <h1>ARIA Capital</h1>
+      <p>Investment Advisory · Est. 2024</p>
+    </div>
+  </div>
+  <nav class="store-nav">
+    <a href="#">Home</a>
+    <a href="#">Markets</a>
+    <a href="#">Research</a>
+    <a href="#">Contact</a>
+  </nav>
+</header>
+
+<!-- TICKER BAR -->
+<div class="ticker-bar">
+  <div class="ticker-item"><span class="sym">NIFTY 50</span><span class="val">23,812</span><span class="chg up">▲ 1.2%</span></div>
+  <div class="ticker-item"><span class="sym">SENSEX</span><span class="val">78,553</span><span class="chg up">▲ 0.9%</span></div>
+  <div class="ticker-item"><span class="sym">TCS</span><span class="val">₹3,842</span><span class="chg down">▼ 0.4%</span></div>
+  <div class="ticker-item"><span class="sym">RELIANCE</span><span class="val">₹2,917</span><span class="chg up">▲ 1.1%</span></div>
+  <div class="ticker-item"><span class="sym">INFY</span><span class="val">₹1,623</span><span class="chg up">▲ 0.7%</span></div>
+  <div class="ticker-item"><span class="sym">S&amp;P 500</span><span class="val">5,891</span><span class="chg up">▲ 0.3%</span></div>
+  <div class="ticker-item"><span class="sym">NASDAQ</span><span class="val">19,432</span><span class="chg down">▼ 0.2%</span></div>
+  <div class="ticker-item"><span class="sym">AAPL</span><span class="val">$228</span><span class="chg up">▲ 0.5%</span></div>
+</div>
+
+<div class="hero">
+  <h2>Intelligent Investment Advisory</h2>
+  <p>AI-powered stock analysis for Indian &amp; US markets — professional, data-driven, precise</p>
+  <div class="hero-badges">
+    <span class="badge">📊 Technical Analysis</span>
+    <span class="badge">🇮🇳 NSE / BSE</span>
+    <span class="badge">🇺🇸 US Markets</span>
+    <span class="badge">⚡ Real-Time Data</span>
+  </div>
+</div>
+
+<section class="section">
+  <h3>Coverage Universe</h3>
+  <div class="product-grid">
+    <div class="product-card"><div class="emoji">🏦</div><h4>Banking & Finance</h4><p>HDFC, ICICI, SBI, Kotak</p></div>
+    <div class="product-card"><div class="emoji">💻</div><h4>IT & Technology</h4><p>TCS, Infosys, Wipro, HCL</p></div>
+    <div class="product-card"><div class="emoji">⚡</div><h4>Energy & Power</h4><p>Reliance, ONGC, NTPC</p></div>
+    <div class="product-card"><div class="emoji">🏗️</div><h4>Infrastructure</h4><p>L&T, Adani Ports, Power Grid</p></div>
+    <div class="product-card"><div class="emoji">💊</div><h4>Pharma & Health</h4><p>Sun Pharma, Cipla, Dr Reddy</p></div>
+    <div class="product-card"><div class="emoji">🚗</div><h4>Auto & Mobility</h4><p>Tata Motors, Maruti, Hero</p></div>
+    <div class="product-card"><div class="emoji">🍎</div><h4>US Big Tech</h4><p>Apple, Microsoft, Google, Meta</p></div>
+    <div class="product-card"><div class="emoji">⚡</div><h4>US Semiconductors</h4><p>Nvidia, AMD, Intel, TSMC</p></div>
+    <div class="product-card"><div class="emoji">🏦</div><h4>US Banking</h4><p>JPMorgan, Goldman, Morgan Stanley</p></div>
+    <div class="product-card"><div class="emoji">🛒</div><h4>US Consumer</h4><p>Walmart, Nike, McDonald's, Disney</p></div>
+    <div class="product-card"><div class="emoji">💊</div><h4>US Healthcare</h4><p>Pfizer, J&J, Eli Lilly, Abbott</p></div>
+    <div class="product-card"><div class="emoji">🛢️</div><h4>US Energy</h4><p>Exxon, Chevron, Boeing, Caterpillar</p></div>
+  </div>
+</section>
+
+<!-- FLOATING BOT -->
+<div class="bot-launcher" id="botLauncher" onclick="toggleChat()">
+  <div class="bot-prompt" id="botPrompt">💼 Ask ARIA</div>
+  <div class="bot-avatar-btn">🤖</div>
+</div>
+
+<!-- CHAT POPUP -->
+<div class="chat-popup" id="chatPopup">
+  <div class="popup-header">
+    <div class="popup-avatar">🤖</div>
+    <div class="popup-info">
+      <h4>ARIA — Investment Advisor</h4>
+      <p><span class="online-dot"></span> Online · Markets Open</p>
+    </div>
+    <button class="close-btn" onclick="toggleChat()">✕</button>
+  </div>
+
+  <!-- SIGNAL BADGE (shown after stock analysis) -->
+  <div class="signal-card" id="signalCard">
+    <span class="signal-ticker" id="signalTicker">—</span>
+    <span class="signal-price" id="signalPrice">—</span>
+    <span class="signal-badge" id="signalBadge">—</span>
+    <span class="signal-conf" id="signalConf">—</span>
+  </div>
+
+  <div id="chat-box"></div>
+
+  <div class="msg-row typing-row" id="typing-row">
+    <div class="msg-avatar bot">🤖</div>
+    <div class="typing-bubble"><span></span><span></span><span></span></div>
+  </div>
+
+  <div class="chips-bar">
+    <button class="chip" onclick="sendMsg('Analyse TCS')">📊 TCS</button>
+    <button class="chip" onclick="sendMsg('What about Reliance?')">⚡ Reliance</button>
+    <button class="chip" onclick="sendMsg('Should I buy Nvidia?')">🤖 Nvidia</button>
+    <button class="chip" onclick="sendMsg('Apple stock analysis')">🍎 Apple</button>
+  </div>
+
+  <div class="popup-input">
+    <textarea id="user-input" rows="1" placeholder="Ask about any stock…" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+    <button class="send-btn" onclick="sendFromInput()">
+      <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
+    </button>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/chat.js') }}"></script>
+</body>
+</html>
