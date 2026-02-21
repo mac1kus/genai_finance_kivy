@@ -1,0 +1,7 @@
+flask
+groq
+yfinance
+numpy
+pandas
+python-dotenv
+gunicorn
